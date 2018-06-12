@@ -1,0 +1,43 @@
+version: '2'
+services:
+    pool:
+        build: pool
+        ports:
+            - "3333:3333"
+            - "4444:4444"
+            - "5555:5555"
+            - "8118:8118"
+        restart: always
+        depends_on:
+            - redis
+            - ryo-wallet
+    redis:
+        image: "redis:alpine"
+        restart: always
+        volumes:
+            - pool-redis:/data
+    ryod:
+        build: ryod
+        ports:
+            - "19733:19733"
+            - "19734:19734"
+        tty: true
+        restart: always
+        volumes:
+            - ryo-blockchain:/opt/ryod/.ryo
+    ryo-wallet:
+        build: ryo-walletd
+        tty: true
+        restart: always
+        depends_on:
+            - ryod
+    pool-ui:
+        build: pool-ui
+        restart: always
+        ports:
+            - "80:80"
+        depends_on:
+            - pool
+volumes:
+    ryo-blockchain:
+    pool-redis:
